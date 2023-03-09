@@ -297,6 +297,9 @@ def main():  # pragma: no cover
         help=("JSON object with additional options passed to the underlying "
               "transport."))
     parser.add_argument(
+        "--accept-content", dest="accept_content",
+        help=("Comma separated list of additional Celery accept_content options"))
+    parser.add_argument(
         '--addr', dest='addr', default=DEFAULT_ADDR,
         help="Address the HTTPD should listen on. Defaults to {}".format(
             DEFAULT_ADDR))
@@ -349,6 +352,11 @@ def main():  # pragma: no cover
         else:
             app.conf.broker_transport_options = transport_options
 
+    app.conf.accept_content = ["msgpack", "json"]
+    if opts.accept_content:
+        app.conf.accept_content += opts.accept_content.split(",")
+
+    print(f"config:{app.conf}")
     setup_metrics(app)
 
     t = MonitorThread(app=app, max_tasks_in_memory=opts.max_tasks_in_memory)
