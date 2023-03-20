@@ -230,7 +230,8 @@ class QueueLengthMonitoringThread(threading.Thread):
             try:
                 length = self.connection.default_channel.queue_declare(queue=queue, passive=True).message_count
             except (amqp.exceptions.ChannelError,) as e:
-                logging.warning("Queue Not Found: {}. Setting its value to zero. Error: {}".format(queue, str(e)))
+                # This is normal - for example if celery workers start up.
+                # logging.warning("Queue Not Found: {}. Setting its value to zero. Error: {}".format(queue, str(e)))
                 length = 0
 
             self.set_queue_length(queue, length)
@@ -352,11 +353,10 @@ def main():  # pragma: no cover
         else:
             app.conf.broker_transport_options = transport_options
 
-    app.conf.accept_content = ["msgpack", "json"]
     if opts.accept_content:
         app.conf.accept_content += opts.accept_content.split(",")
 
-    print(f"config:{app.conf}")
+    logging.info("app config: %s", app.conf)
     setup_metrics(app)
 
     t = MonitorThread(app=app, max_tasks_in_memory=opts.max_tasks_in_memory)
