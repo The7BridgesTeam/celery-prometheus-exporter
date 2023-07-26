@@ -354,7 +354,8 @@ def main():  # pragma: no cover
             app.conf.broker_transport_options = transport_options
 
     if opts.accept_content:
-        app.conf.accept_content += opts.accept_content.split(",")
+        # Allow for initial tuple, and remove duplicates
+        app.conf.accept_content = list(set(list(app.conf.accept_content) + opts.accept_content.split(",")))
 
     logging.info("app config: %s", app.conf)
     setup_metrics(app)
